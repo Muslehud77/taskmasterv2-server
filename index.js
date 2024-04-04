@@ -43,10 +43,22 @@ async function run() {
         res.status(500).json({ error: 'Internal Server Error' });
       }
     });
+    app.get('/task/:id', async (req, res) => {
+      const taskId = req.params.id
+      try {
+        const task = await tasksCollection.findOne({
+          _id: new ObjectId(taskId),
+        });
+        res.json(task);
+      } catch (err) {
+        console.error('Error fetching tasks:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
 
     app.post('/tasks', async (req, res) => {
       const newTask = req.body;
-
+      console.log(newTask);
       try {
         const result = await tasksCollection.insertOne(newTask);
         res.status(201).json(result);
@@ -58,10 +70,10 @@ async function run() {
 
     app.delete('/tasks/:id', async (req, res) => {
       const taskId = req.params.id;
-
+      
       try {
         const result = await tasksCollection.deleteOne({
-          _id: ObjectId(taskId),
+          _id: new ObjectId(taskId),
         });
         if (result.deletedCount === 0) {
           res.status(404).json({ error: 'Task not found' });
@@ -76,12 +88,12 @@ async function run() {
 
     app.patch('/tasks/:id', async (req, res) => {
       const taskId = req.params.id;
-      const updatedTaskData = req.body;
-
+      const status = req.body;
+      
       try {
         const result = await tasksCollection.updateOne(
           { _id: new ObjectId(taskId) },
-          { $set: updatedTaskData }
+          { $set: status }
         );
 
         if (result.matchedCount === 0) {
@@ -100,5 +112,5 @@ async function run() {
 run().catch(console.dir);
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Taskmaster is listening on port ${port}`);
 });
