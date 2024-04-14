@@ -36,13 +36,25 @@ async function run() {
 
     app.get('/tasks', async (req, res) => {
       try {
-        const tasks = await tasksCollection.find({}).toArray();
+        const tasks = await tasksCollection.find().toArray();
         res.json(tasks);
       } catch (err) {
         console.error('Error fetching tasks:', err);
         res.status(500).json({ error: 'Internal Server Error' });
       }
     });
+
+    app.get('/tasks/archive',async (req,res)=>{
+      try{
+        const archive = await tasksCollection.find({status : "archive"}).toArray()
+        res.json(archive)
+      }catch (err){
+          console.error("Error fetching archive:", err);
+          res.status(500).json({ error: "Internal Server Error" });
+      }
+    })
+
+
     app.get('/task/:id', async (req, res) => {
       const taskId = req.params.id
       try {
@@ -58,7 +70,7 @@ async function run() {
 
     app.post('/tasks', async (req, res) => {
       const newTask = req.body;
-      console.log(newTask);
+     
       try {
         const result = await tasksCollection.insertOne(newTask);
         res.status(201).json(result);
